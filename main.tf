@@ -32,7 +32,3 @@ resource "airtelcloud_vm" "this" {
 }
 
 
-
-
-
-
