@@ -30,3 +30,9 @@ resource "airtelcloud_vm" "this" {
 
   tags = var.tags
 }
+
+
+
+
+
+
