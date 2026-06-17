@@ -17,7 +17,7 @@ Terraform module for provisioning Virtual Machines on Airtel Cloud.
 
 ```hcl
 module "vm" {
-  source = "..."
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "web01"
 
@@ -37,7 +37,7 @@ module "vm" {
 
 ```hcl
 module "vm" {
-  source = "../../"
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "production-web01"
 
@@ -96,7 +96,7 @@ locals {
 module "vm" {
   for_each = local.vms
 
-  source = "Airtel-Cloud-Platform/vm/airtelcloud"
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = each.key
 
