@@ -1,35 +1,39 @@
-output "vm_id" {
-  description = "VM ID"
+output "id" {
+  description = "VM ID."
   value       = airtelcloud_vm.this.id
 }
 
-output "vm_status" {
-  description = "VM status"
-  value       = airtelcloud_vm.this.status
+output "provider_instance_id" {
+  description = "Provider instance ID."
+  value       = airtelcloud_vm.this.provider_instance_id
 }
 
-output "private_ip" {
-  description = "VM private IP"
-  value       = airtelcloud_vm.this.private_ip
-}
-
-output "public_ip" {
-  description = "VM public IP"
-  value       = airtelcloud_vm.this.public_ip
-}
-
-output "vm_name" {
-  description = "VM name"
+output "instance_name" {
+  description = "VM name."
   value       = airtelcloud_vm.this.instance_name
 }
 
-output "vm" {
-  description = "Complete VM object"
-  value = {
-    id         = airtelcloud_vm.this.id
-    name       = airtelcloud_vm.this.instance_name
-    status     = airtelcloud_vm.this.status
-    private_ip = airtelcloud_vm.this.private_ip
-    public_ip  = airtelcloud_vm.this.public_ip
-  }
+output "status" {
+  description = "Current VM status."
+  value       = airtelcloud_vm.this.status
+}
+
+output "public_ip" {
+  description = "Public IP address."
+  value       = airtelcloud_vm.this.public_ip
+}
+
+output "private_ip" {
+  description = "Private IP address."
+  value       = airtelcloud_vm.this.private_ip
+}
+
+output "availability_zone" {
+  description = "Availability Zone."
+  value       = airtelcloud_vm.this.availability_zone
+}
+
+output "region" {
+  description = "Cloud Region."
+  value       = airtelcloud_vm.this.region
 }

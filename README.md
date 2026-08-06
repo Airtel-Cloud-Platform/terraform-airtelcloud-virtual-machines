@@ -1,22 +1,49 @@
-# VM Module
+# Airtel Cloud Virtual Machine Terraform Module
 
-Terraform module for provisioning Virtual Machines on Airtel Cloud.
+This Terraform module provisions Virtual Machines (VMs) on Airtel Cloud using the `airtelcloud_vm` resource.
 
-## Features
+The module supports all capabilities currently available in the Airtel Cloud Terraform Provider, including:
 
-* Creates Airtel Cloud VM instances
-* Supports Linux and Windows operating systems
-* Supports custom images and flavors
-* Configurable boot disk size
-* Supports resource tagging
-* Exposes VM networking information through outputs
+- VM creation
+- Boot from volume
+- Image by ID or Name
+- Flavor by ID or Name
+- VPC by ID or Name
+- Subnet by ID or Name
+- Security Group by ID or Name
+- Keypair by ID or Name
+- Username/Password authentication
+- Backup configuration
+- Cloud-init (User Data)
+- Tags
+- Timeouts
 
-## Usage
+---
 
-### Basic Example
+## Requirements
+
+| Name | Version |
+|------|---------|
+| Terraform | >= 1.3 |
+| airtelcloud | >= 1.1.4 |
+
+---
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| airtelcloud | >= 1.1.4 |
+
+---
+
+# Usage
+
+## Basic Example
 
 ```hcl
 module "vm" {
+
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "web01"
@@ -24,152 +51,177 @@ module "vm" {
   os_type = "linux"
 
   flavor = "ccd.Large"
-  image  = "CentOS_Stream9_May2026"
 
-  vpc_id    = "vpc-id"
-  subnet_id = "subnet-id"
+  image = "CentOS_Stream9_May2026"
+
+  vpc_name = "production"
+
+  subnet_name = "private"
 
   availability_zone = "S1"
+
+  keypair_name = "platform-key"
+
 }
 ```
 
-### Complete Example
+---
+
+## Complete Example
 
 ```hcl
 module "vm" {
+
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
-  vm_name = "production-web01"
+  vm_name = "production-web"
 
   os_type = "linux"
 
-  flavor = "ccd.Large"
-  image  = "CentOS_Stream9_Mar2026"
+  flavor = "ccd.XLarge"
 
-  vpc_id    = "vpc-id"
-  subnet_id = "subnet-id"
+  image = "CentOS_Stream9_May2026"
 
-  security_group_id = "sg-id"
+  vpc_name = "production"
 
-  availability_zone = "S2"
+  subnet_name = "private"
+
+  security_group_name = "default"
+
+  keypair_name = "platform-key"
+
+  availability_zone = "S1"
+
+  disk_size = 100
 
   boot_from_volume = true
-  disk_size        = 100
 
-  keypair_id = "keypair-id"
+  enable_backup = true
 
-  user_data = <<-EOF
-    #!/bin/bash
-    echo "Hello World"
-  EOF
-
-  enable_backup  = true
   protection_plan = "daily"
 
   start_date = "2026-06-01"
+
   start_time = "02:00"
 
-  vm_count = 1
-
-  description = "Production web server"
-
   tags = {
-    Environment = "production"
-    Application = "web"
-    Owner       = "platform-team"
+    Environment = "Production"
+    Team        = "Platform"
   }
+
 }
 ```
-## Creating Multiple VMs
 
-Use Terraform `for_each` to create multiple VM instances.
+---
+
+# Authentication Options
+
+The module supports both authentication methods supported by the provider.
+
+## SSH Keypair
 
 ```hcl
-locals {
-  vms = {
-    web01 = {}
-    web02 = {}
-    web03 = {}
-  }
-}
-
-module "vm" {
-  for_each = local.vms
-
-  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
-
-  vm_name = each.key
-
-  os_type = "linux"
-
-  flavor = "ccd.Large"
-  image  = "CentOS_Stream9_May2026"
-
-  vpc_id    = var.vpc_id
-  subnet_id = var.subnet_id
-
-  availability_zone = "S1"
-}
+keypair_id = "xxxxx"
 ```
-## Notes
 
-### Security Group Attachment
+or
 
-When attaching an existing Security Group, the `security_group_id` parameter expects the numeric Security Group ID and not the Security Group UUID.
+```hcl
+keypair_name = "platform-key"
+```
+
+---
+
+## Username / Password
+
+```hcl
+admin_username = "terraform"
+
+admin_password = "Password@123"
+```
+
+---
+
+# Network Selection
+
+Resources can be referenced either by **ID** or by **Name**.
 
 Example:
 
 ```hcl
-security_group_id = tostring(module.security_group.security_group_id)
+vpc_id = "123"
 ```
 
-Do not use:
+or
 
 ```hcl
-security_group_id = module.security_group.security_group_uuid
+vpc_name = "production"
 ```
 
-## Inputs
+The same applies to:
 
-| Name | Description | Type | Required | Default |
-|------|-------------|------|----------|---------|
-| vm_name | Virtual machine name | string | Yes | - |
-| os_type | Operating system type (linux/windows) | string | Yes | - |
-| flavor | VM flavor | string | Yes | - |
-| image | VM image | string | Yes | - |
-| vpc_id | Target VPC ID | string | Yes | - |
-| subnet_id | Target subnet ID | string | Yes | - |
-| availability_zone | Availability zone | string | Yes | - |
-| boot_from_volume | Whether VM should boot from volume | bool | No | true |
-| disk_size | Boot disk size in GB | number | No | 100 |
-| security_group_id | Numeric Security Group ID to attach to the VM. Do not use Security Group UUID | string | No | null |
-| keypair_id | Keypair ID for SSH access | string | No | null |
-| user_data | Cloud-init or bootstrap script | string | No | null |
-| volume_type_id | Volume type ID | string | No | null |
-| enable_backup | Enable VM backup | bool | No | false |
-| protection_plan | Backup protection plan | string | No | null |
-| start_date | Backup start date (YYYY-MM-DD) | string | No | null |
-| start_time | Backup start time (HH:MM) | string | No | null |
-| description | VM description | string | No | "" |
-| tags | Resource tags | map(string) | No | {} |
+- Flavor
+- Image
+- VPC
+- Subnet
+- Security Group
+- Keypair
 
-## Outputs
+---
 
-## Outputs
+# Inputs
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| vm_name | VM Name | string | n/a |
+| os_type | linux/windows | string | n/a |
+| flavor | Flavor Name | string | null |
+| flavor_id | Flavor ID | string | null |
+| image | Image Name | string | null |
+| image_id | Image ID | string | null |
+| vpc_id | VPC ID | string | null |
+| vpc_name | VPC Name | string | null |
+| subnet_id | Subnet ID | string | null |
+| subnet_name | Subnet Name | string | null |
+| security_group_id | Security Group ID | string | null |
+| security_group_name | Security Group Name | string | null |
+| keypair_id | Keypair ID | string | null |
+| keypair_name | Keypair Name | string | null |
+| admin_username | Admin Username | string | null |
+| admin_password | Admin Password | string | null |
+| availability_zone | Availability Zone | string | null |
+| region | Region | string | null |
+| disk_size | Disk Size (GB) | number | 100 |
+| boot_from_volume | Boot From Volume | bool | true |
+| volume_type_id | Volume Type ID | string | null |
+| user_data | Cloud Init | string | null |
+| description | VM Description | string | "" |
+| enable_backup | Enable Backup | bool | false |
+| protection_plan | Backup Policy | string | null |
+| start_date | Backup Date | string | null |
+| start_time | Backup Time | string | null |
+| tags | Tags | map(string) | {} |
+
+---
+
+# Outputs
 
 | Name | Description |
 |------|-------------|
-| vm_id | VM ID |
-| vm_name | VM name |
-| vm_status | Current VM status |
-| private_ip | VM private IP address |
-| public_ip | VM public IP address |
-| vm | Complete VM output object |
+| id | VM ID |
+| provider_instance_id | Provider Instance ID |
+| instance_name | VM Name |
+| status | Current VM Status |
+| public_ip | Public IP |
+| private_ip | Private IP |
+| availability_zone | Availability Zone |
+| region | Region |
 
-## Requirements
+---
 
-| Name                  | Version  |
-| --------------------- | -------- |
-| Terraform             | >= 1.5   |
-| Airtel Cloud Provider | >= 1.0.4 |
+# Notes
 
+- Either ID or Name can be used for supported resources.
+- Existing users can continue using `flavor` and `image`; these map internally to the provider's `flavor_name` and `image_name`.
+- Username/password authentication is supported only for Linux VMs, as enforced by the provider.
+- The module intentionally does not expose `vm_count` because of the provider behavior you previously observed with resource destruction.

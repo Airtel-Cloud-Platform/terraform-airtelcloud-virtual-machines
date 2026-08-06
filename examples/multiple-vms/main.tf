@@ -1,5 +1,7 @@
 locals {
+
   vms = {
+
     web01 = {
       flavor = "ccd.Large"
     }
@@ -11,10 +13,13 @@ locals {
     web03 = {
       flavor = "ccd.XLarge"
     }
+
   }
+
 }
 
 module "vm" {
+
   for_each = local.vms
 
   source = "../../"
@@ -27,8 +32,12 @@ module "vm" {
 
   image = "CentOS_Stream9_May2026"
 
-  vpc_id    = "vpc-id"
-  subnet_id = "subnet-id"
+  vpc_name = "production"
+
+  subnet_name = "private"
 
   availability_zone = "S1"
+
+  keypair_name = "platform-key"
+
 }
