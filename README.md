@@ -67,6 +67,170 @@ module "vm" {
 
 ---
 
+## Linux VM with Username and Password
+
+```hcl
+module "vm" {
+
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  vm_name = "linux-app01"
+
+  os_type = "linux"
+
+  flavor = "ccd.Large"
+
+  image = "CentOS_Stream9_May2026"
+
+  vpc_name = "production"
+
+  subnet_name = "private"
+
+  availability_zone = "S1"
+
+  admin_username = "terraform"
+
+  admin_password = "StrongPassword@123"
+
+}
+```
+
+---
+
+## Linux VM Complete Example with Username and Password
+
+```hcl
+module "linux_vm_complete" {
+
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  vm_name = "linux-prod-app01"
+
+  os_type = "linux"
+
+  flavor = "ccd.XLarge"
+
+  image = "CentOS_Stream9_May2026"
+
+  vpc_name = "production"
+
+  subnet_name = "private"
+
+  security_group_name = "default"
+
+  availability_zone = "S1"
+
+  admin_username = "terraform"
+
+  admin_password = "StrongPassword@123"
+
+  disk_size = 100
+
+  boot_from_volume = true
+
+  user_data = <<-EOT
+    #!/bin/bash
+    yum install -y nginx
+    systemctl enable nginx
+    systemctl start nginx
+  EOT
+
+  enable_backup = true
+
+  protection_plan = "daily"
+
+  start_date = "2026-06-01"
+
+  start_time = "02:00"
+
+  description = "Linux production VM using username/password authentication"
+
+  tags = {
+    Environment = "Production"
+    Application = "Web"
+    Team        = "Platform"
+  }
+
+}
+```
+
+---
+
+## Windows VM with Username and Password
+
+```hcl
+module "vm" {
+
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  vm_name = "windows-app01"
+
+  os_type = "windows"
+
+  flavor = "ccd.Large"
+
+  image = "WIN2K19_PREACT_Jul2026"
+
+  vpc_name = "production"
+
+  subnet_name = "private"
+
+  availability_zone = "S1"
+
+
+}
+```
+
+---
+
+## Windows VM Complete Example with Username and Password
+
+```hcl
+module "windows_vm_complete" {
+
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  vm_name = "windows-prod-app01"
+
+  os_type = "windows"
+
+  flavor = "ccd.XLarge"
+
+  image = "WIN2K19_PREACT_Jul2026"
+
+  vpc_name = "production"
+
+  subnet_name = "private"
+
+  security_group_name = "default"
+
+  availability_zone = "S1"
+
+  disk_size = 200
+
+  boot_from_volume = true
+
+  enable_backup = true
+
+  protection_plan = "daily"
+
+  start_date = "2026-06-01"
+
+  start_time = "02:00"
+
+  description = "Windows production VM using username/password authentication"
+
+  tags = {
+    Environment = "Production"
+    Application = "App"
+    Team        = "Platform"
+  }
+
+}
+```
+
+---
+
 ## Complete Example
 
 ```hcl
