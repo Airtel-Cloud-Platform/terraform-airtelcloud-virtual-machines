@@ -235,6 +235,15 @@ variable "admin_password" {
 
     error_message = "Specify admin_username and admin_password together."
   }
+
+  validation {
+    condition = !(
+      (var.admin_username != null || var.admin_password != null) &&
+      (var.keypair_id != null || var.keypair_name != null)
+    )
+
+    error_message = "Use either admin credentials or keypair input, not both."
+  }
 }
 
 #########################################
