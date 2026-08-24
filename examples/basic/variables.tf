@@ -56,22 +56,29 @@ variable "flavor_id" {
 #########################################
 
 variable "image" {
-  description = "Image name. Mutually exclusive with image_id."
+  description = "Image name. Mutually exclusive with image_id and snapshot_name."
   type        = string
   default     = null
 
   validation {
-    condition = !(
-      var.image != null &&
-      var.image_id != null
-    )
+    condition = length(compact([
+      var.image,
+      var.image_id,
+      var.snapshot_name,
+    ])) == 1
 
-    error_message = "Specify either image or image_id, not both."
+    error_message = "Specify exactly one of image, image_id, or snapshot_name."
   }
 }
 
 variable "image_id" {
-  description = "Image ID. Mutually exclusive with image."
+  description = "Image ID. Mutually exclusive with image and snapshot_name."
+  type        = string
+  default     = null
+}
+
+variable "snapshot_name" {
+  description = "Snapshot name. Mutually exclusive with image and image_id."
   type        = string
   default     = null
 }
@@ -142,24 +149,24 @@ variable "region" {
 # Security Group
 #########################################
 
-variable "security_group_id" {
-  description = "Security Group ID."
-  type        = string
+variable "security_group_ids" {
+  description = "Security Group IDs."
+  type        = list(string)
   default     = null
 }
 
-variable "security_group_name" {
-  description = "Security Group Name."
-  type        = string
+variable "security_group_names" {
+  description = "Security Group Names."
+  type        = list(string)
   default     = null
 
   validation {
     condition = !(
-      var.security_group_id != null &&
-      var.security_group_name != null
+      var.security_group_ids != null &&
+      var.security_group_names != null
     )
 
-    error_message = "Specify either security_group_id or security_group_name, not both."
+    error_message = "Specify either security_group_ids or security_group_names, not both."
   }
 }
 
@@ -214,7 +221,7 @@ variable "boot_from_volume" {
 variable "disk_size" {
   description = "Boot disk size in GB."
   type        = number
-  default     = 100
+  default     = 20
 
   validation {
     condition     = var.disk_size >= 20
@@ -244,10 +251,10 @@ variable "description" {
   default     = ""
 }
 
-variable "tags" {
-  description = "Tags to assign to the VM."
-  type        = map(string)
-  default     = {}
+variable "labels" {
+  description = "Labels to assign to the VM."
+  type        = list(string)
+  default     = null
 }
 
 #########################################
