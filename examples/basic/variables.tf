@@ -36,12 +36,12 @@ variable "flavor" {
   default     = null
 
   validation {
-    condition = length(compact([
-      var.flavor,
-      var.flavor_id,
-    ])) == 1
+    condition = !(
+      var.flavor != null &&
+      var.flavor_id != null
+    )
 
-    error_message = "Specify exactly one of flavor or flavor_id."
+    error_message = "Specify either flavor or flavor_id, not both."
   }
 }
 
@@ -49,6 +49,15 @@ variable "flavor_id" {
   description = "Flavor ID. Mutually exclusive with flavor."
   type        = string
   default     = null
+
+  validation {
+    condition = length(compact([
+      var.flavor,
+      var.flavor_id,
+    ])) == 1
+
+    error_message = "Specify exactly one of flavor or flavor_id."
+  }
 }
 
 #########################################
