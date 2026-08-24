@@ -74,9 +74,9 @@ variable "image" {
       var.image,
       var.image_id,
       var.snapshot_name,
-    ])) <= 1
+    ])) == 1
 
-    error_message = "Specify only one of image, image_id, or snapshot_name."
+    error_message = "Specify exactly one of image, image_id, or snapshot_name."
   }
 }
 
