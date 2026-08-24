@@ -35,7 +35,7 @@ module "vm" {
 
   subnet_name = "private"
 
-  security_group_name = "default"
+  security_group_names = ["default"]
 
   keypair_name = "platform-key"
 
@@ -63,12 +63,7 @@ EOF
 
   start_time = "02:00"
 
-  tags = {
-    Environment = "Production"
-    Application = "Web"
-    Team        = "Platform"
-    ManagedBy   = "Terraform"
-  }
+  labels = ["production", "web", "platform", "terraform"]
 
   timeouts = {
     create = "30m"
