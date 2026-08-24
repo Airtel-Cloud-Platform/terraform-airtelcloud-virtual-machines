@@ -1,0 +1,9 @@
+# Local test workspace
+local-testing/
+
+# Terraform local init/test artifacts
+**/.terraform/
+**/.terraform.lock.hcl
+
+# Test-only example provider vars
+examples/complete/variables.tf

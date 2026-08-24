@@ -34,15 +34,6 @@ variable "flavor" {
   description = "Flavor name. Mutually exclusive with flavor_id."
   type        = string
   default     = null
-
-  validation {
-    condition = !(
-      var.flavor != null &&
-      var.flavor_id != null
-    )
-
-    error_message = "Specify either flavor or flavor_id, not both."
-  }
 }
 
 variable "flavor_id" {
@@ -237,6 +228,15 @@ variable "admin_username" {
   description = "Linux administrator username."
   type        = string
   default     = null
+
+  validation {
+    condition = (
+      var.admin_username == null ||
+      length(trim(var.admin_username, " ")) > 0
+    )
+
+    error_message = "admin_username may not be an empty string."
+  }
 }
 
 variable "admin_password" {
@@ -281,15 +281,6 @@ variable "admin_password" {
     )
 
     error_message = "admin_username/admin_password are only supported when os_type is linux."
-  }
-
-  validation {
-    condition = (
-      var.admin_username == null ||
-      length(trim(var.admin_username, " ")) > 0
-    )
-
-    error_message = "admin_username may not be an empty string."
   }
 
   validation {
