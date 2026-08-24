@@ -164,6 +164,15 @@ variable "security_group_ids" {
   description = "Security Group IDs."
   type        = list(string)
   default     = null
+
+  validation {
+    condition = (
+      var.security_group_ids == null ||
+      alltrue([for sg in var.security_group_ids : length(trim(sg, " ")) > 0])
+    )
+
+    error_message = "security_group_ids must not contain empty values."
+  }
 }
 
 variable "security_group_names" {
@@ -178,6 +187,15 @@ variable "security_group_names" {
     )
 
     error_message = "Specify either security_group_ids or security_group_names, not both."
+  }
+
+  validation {
+    condition = (
+      var.security_group_names == null ||
+      alltrue([for sg in var.security_group_names : length(trim(sg, " ")) > 0])
+    )
+
+    error_message = "security_group_names must not contain empty values."
   }
 }
 
@@ -246,6 +264,33 @@ variable "admin_password" {
 
     error_message = "For linux os_type, provide either keypair input or admin credentials."
   }
+
+  validation {
+    condition = (
+      (var.admin_username == null && var.admin_password == null) ||
+      lower(var.os_type) == "linux"
+    )
+
+    error_message = "admin_username/admin_password are only supported when os_type is linux."
+  }
+
+  validation {
+    condition = (
+      var.admin_username == null ||
+      length(trim(var.admin_username, " ")) > 0
+    )
+
+    error_message = "admin_username may not be an empty string."
+  }
+
+  validation {
+    condition = (
+      var.admin_password == null ||
+      length(trim(var.admin_password, " ")) > 0
+    )
+
+    error_message = "admin_password may not be an empty string."
+  }
 }
 
 #########################################
@@ -295,6 +340,26 @@ variable "labels" {
   description = "Labels to assign to the VM."
   type        = list(string)
   default     = null
+
+  validation {
+    condition = (
+      var.labels == null ||
+      length(var.labels) <= 5
+    )
+
+    error_message = "labels supports at most 5 labels."
+  }
+
+  validation {
+    condition = (
+      var.labels == null ||
+      alltrue([
+        for label in var.labels : length(trim(label, " ")) >= 3 && length(trim(label, " ")) <= 15
+      ])
+    )
+
+    error_message = "Each label must be between 3 and 15 characters long."
+  }
 }
 
 #########################################
