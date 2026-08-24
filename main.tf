@@ -11,8 +11,9 @@ resource "airtelcloud_vm" "this" {
   flavor_id   = var.flavor_id
   flavor_name = var.flavor_id == null ? var.flavor : null
 
-  image_id   = var.image_id
-  image_name = var.image_id == null ? var.image : null
+  image_id      = var.image_id
+  image_name    = var.image_id == null ? var.image : null
+  snapshot_name = var.snapshot_name
 
   #####################################
   # Networking

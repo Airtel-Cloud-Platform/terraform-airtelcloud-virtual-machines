@@ -56,22 +56,29 @@ variable "flavor_id" {
 #########################################
 
 variable "image" {
-  description = "Image name. Mutually exclusive with image_id."
+  description = "Image name. Mutually exclusive with image_id and snapshot_name."
   type        = string
   default     = null
 
   validation {
-    condition = !(
-      var.image != null &&
-      var.image_id != null
-    )
+    condition = length(compact([
+      var.image,
+      var.image_id,
+      var.snapshot_name,
+    ])) <= 1
 
-    error_message = "Specify either image or image_id, not both."
+    error_message = "Specify only one of image, image_id, or snapshot_name."
   }
 }
 
 variable "image_id" {
-  description = "Image ID. Mutually exclusive with image."
+  description = "Image ID. Mutually exclusive with image and snapshot_name."
+  type        = string
+  default     = null
+}
+
+variable "snapshot_name" {
+  description = "Snapshot name. Mutually exclusive with image and image_id."
   type        = string
   default     = null
 }
