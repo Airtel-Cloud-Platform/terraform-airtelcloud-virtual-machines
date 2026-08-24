@@ -36,12 +36,12 @@ variable "flavor" {
   default     = null
 
   validation {
-    condition = !(
-      var.flavor != null &&
-      var.flavor_id != null
-    )
+    condition = length(compact([
+      var.flavor,
+      var.flavor_id,
+    ])) == 1
 
-    error_message = "Specify either flavor or flavor_id, not both."
+    error_message = "Specify exactly one of flavor or flavor_id."
   }
 }
 
