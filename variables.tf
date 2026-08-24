@@ -279,6 +279,21 @@ variable "start_date" {
   default     = null
 }
 
+variable "weekday" {
+  description = "Backup weekday. Mutually exclusive with start_date."
+  type        = string
+  default     = null
+
+  validation {
+    condition = !(
+      var.start_date != null &&
+      var.weekday != null
+    )
+
+    error_message = "Specify either start_date or weekday, not both."
+  }
+}
+
 variable "start_time" {
   description = "Backup start time."
   type        = string

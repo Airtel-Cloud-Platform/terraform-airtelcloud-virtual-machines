@@ -79,6 +79,7 @@ resource "airtelcloud_vm" "this" {
   protection_plan = var.protection_plan
 
   start_date = var.start_date
+  weekday    = var.weekday
 
   start_time = var.start_time
 
