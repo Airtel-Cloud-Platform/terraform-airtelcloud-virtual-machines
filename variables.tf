@@ -108,12 +108,12 @@ variable "vpc_name" {
   default     = null
 
   validation {
-    condition = !(
-      var.vpc_id != null &&
-      var.vpc_name != null
-    )
+    condition = length(compact([
+      var.vpc_id,
+      var.vpc_name,
+    ])) == 1
 
-    error_message = "Specify either vpc_id or vpc_name, not both."
+    error_message = "Specify exactly one of vpc_id or vpc_name."
   }
 }
 
