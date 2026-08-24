@@ -68,7 +68,7 @@ resource "airtelcloud_vm" "this" {
 
   description = var.description
 
-  tags = var.tags
+  labels = var.labels
 
   #####################################
   # Backup

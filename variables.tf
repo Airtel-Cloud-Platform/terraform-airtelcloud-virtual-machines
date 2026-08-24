@@ -251,10 +251,10 @@ variable "description" {
   default     = ""
 }
 
-variable "tags" {
-  description = "Tags to assign to the VM."
-  type        = map(string)
-  default     = {}
+variable "labels" {
+  description = "Labels to assign to the VM."
+  type        = list(string)
+  default     = null
 }
 
 #########################################
