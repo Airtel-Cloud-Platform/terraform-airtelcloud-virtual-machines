@@ -99,12 +99,12 @@ variable "vpc_name" {
   default     = null
 
   validation {
-    condition = !(
-      var.vpc_id != null &&
-      var.vpc_name != null
-    )
+    condition = length(compact([
+      var.vpc_id,
+      var.vpc_name,
+    ])) == 1
 
-    error_message = "Specify either vpc_id or vpc_name, not both."
+    error_message = "Specify exactly one of vpc_id or vpc_name."
   }
 }
 
@@ -120,12 +120,12 @@ variable "subnet_name" {
   default     = null
 
   validation {
-    condition = !(
-      var.subnet_id != null &&
-      var.subnet_name != null
-    )
+    condition = length(compact([
+      var.subnet_id,
+      var.subnet_name,
+    ])) == 1
 
-    error_message = "Specify either subnet_id or subnet_name, not both."
+    error_message = "Specify exactly one of subnet_id or subnet_name."
   }
 }
 
@@ -143,6 +143,17 @@ variable "region" {
   description = "Region. Defaults to provider region."
   type        = string
   default     = null
+}
+
+variable "vm_count" {
+  description = "Number of VM instances to create."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.vm_count >= 1 && var.vm_count <= 10
+    error_message = "vm_count must be between 1 and 10."
+  }
 }
 
 #########################################
@@ -206,6 +217,35 @@ variable "admin_password" {
   type        = string
   default     = null
   sensitive   = true
+
+  validation {
+    condition = (
+      (var.admin_username == null && var.admin_password == null) ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "Specify admin_username and admin_password together."
+  }
+
+  validation {
+    condition = !(
+      (var.admin_username != null || var.admin_password != null) &&
+      (var.keypair_id != null || var.keypair_name != null)
+    )
+
+    error_message = "Use either admin credentials or keypair input, not both."
+  }
+
+  validation {
+    condition = (
+      lower(var.os_type) != "linux" ||
+      var.keypair_id != null ||
+      var.keypair_name != null ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "For linux os_type, provide either keypair input or admin credentials."
+  }
 }
 
 #########################################
@@ -268,7 +308,7 @@ variable "enable_backup" {
 }
 
 variable "protection_plan" {
-  description = "Backup protection plan."
+  description = "Backup protection plan ID/UUID."
   type        = string
   default     = null
 }
@@ -277,6 +317,21 @@ variable "start_date" {
   description = "Backup start date."
   type        = string
   default     = null
+}
+
+variable "weekday" {
+  description = "Backup weekday. Mutually exclusive with start_date."
+  type        = string
+  default     = null
+
+  validation {
+    condition = !(
+      var.start_date != null &&
+      var.weekday != null
+    )
+
+    error_message = "Specify either start_date or weekday, not both."
+  }
 }
 
 variable "start_time" {
