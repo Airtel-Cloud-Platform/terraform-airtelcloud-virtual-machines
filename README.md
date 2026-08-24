@@ -116,7 +116,7 @@ module "linux_vm_complete" {
 
   subnet_name = "private"
 
-  security_group_name = "default"
+  security_group_names = ["default"]
 
   availability_zone = "S1"
 
@@ -202,7 +202,7 @@ module "windows_vm_complete" {
 
   subnet_name = "private"
 
-  security_group_name = "default"
+  security_group_names = ["default"]
 
   availability_zone = "S1"
 
@@ -250,7 +250,7 @@ module "vm" {
 
   subnet_name = "private"
 
-  security_group_name = "default"
+  security_group_names = ["default"]
 
   keypair_name = "platform-key"
 
@@ -347,8 +347,8 @@ The same applies to:
 | vpc_name | VPC Name | string | null |
 | subnet_id | Subnet ID | string | null |
 | subnet_name | Subnet Name | string | null |
-| security_group_id | Security Group ID | string | null |
-| security_group_name | Security Group Name | string | null |
+| security_group_ids | Security Group IDs | list(string) | null |
+| security_group_names | Security Group Names | list(string) | null |
 | keypair_id | Keypair ID | string | null |
 | keypair_name | Keypair Name | string | null |
 | admin_username | Admin Username | string | null |
