@@ -317,7 +317,7 @@ variable "enable_backup" {
 }
 
 variable "protection_plan" {
-  description = "Backup protection plan."
+  description = "Backup protection plan ID/UUID."
   type        = string
   default     = null
 }
