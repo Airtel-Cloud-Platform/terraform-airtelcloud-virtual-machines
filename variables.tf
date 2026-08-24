@@ -129,12 +129,12 @@ variable "subnet_name" {
   default     = null
 
   validation {
-    condition = !(
-      var.subnet_id != null &&
-      var.subnet_name != null
-    )
+    condition = length(compact([
+      var.subnet_id,
+      var.subnet_name,
+    ])) == 1
 
-    error_message = "Specify either subnet_id or subnet_name, not both."
+    error_message = "Specify exactly one of subnet_id or subnet_name."
   }
 }
 
