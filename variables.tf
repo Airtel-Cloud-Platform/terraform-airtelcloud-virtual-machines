@@ -226,6 +226,15 @@ variable "admin_password" {
   type        = string
   default     = null
   sensitive   = true
+
+  validation {
+    condition = (
+      (var.admin_username == null && var.admin_password == null) ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "Specify admin_username and admin_password together."
+  }
 }
 
 #########################################
