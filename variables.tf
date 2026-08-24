@@ -145,6 +145,17 @@ variable "region" {
   default     = null
 }
 
+variable "vm_count" {
+  description = "Number of VM instances to create."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.vm_count >= 1 && var.vm_count <= 10
+    error_message = "vm_count must be between 1 and 10."
+  }
+}
+
 #########################################
 # Security Group
 #########################################

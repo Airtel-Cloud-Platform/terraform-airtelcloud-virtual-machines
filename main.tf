@@ -62,6 +62,8 @@ resource "airtelcloud_vm" "this" {
 
   region = var.region
 
+  vm_count = var.vm_count
+
   #####################################
   # Metadata
   #####################################
