@@ -57,7 +57,7 @@ EOF
 
   enable_backup = true
 
-  protection_plan = "daily"
+  protection_plan = "REPLACE_WITH_PLAN_ID"
 
   start_date = "2026-06-01"
 
