@@ -244,6 +244,17 @@ variable "admin_password" {
 
     error_message = "Use either admin credentials or keypair input, not both."
   }
+
+  validation {
+    condition = (
+      lower(var.os_type) != "linux" ||
+      var.keypair_id != null ||
+      var.keypair_name != null ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "For linux os_type, provide either keypair input or admin credentials."
+  }
 }
 
 #########################################
