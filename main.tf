@@ -28,8 +28,8 @@ resource "airtelcloud_vm" "this" {
   # Security
   #####################################
 
-  security_group_id   = var.security_group_id
-  security_group_name = var.security_group_id == null ? var.security_group_name : null
+  security_group_ids   = var.security_group_ids
+  security_group_names = var.security_group_ids == null ? var.security_group_names : null
 
   #####################################
   # Authentication

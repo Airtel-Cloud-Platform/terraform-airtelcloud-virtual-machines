@@ -142,24 +142,24 @@ variable "region" {
 # Security Group
 #########################################
 
-variable "security_group_id" {
-  description = "Security Group ID."
-  type        = string
+variable "security_group_ids" {
+  description = "Security Group IDs."
+  type        = list(string)
   default     = null
 }
 
-variable "security_group_name" {
-  description = "Security Group Name."
-  type        = string
+variable "security_group_names" {
+  description = "Security Group Names."
+  type        = list(string)
   default     = null
 
   validation {
     condition = !(
-      var.security_group_id != null &&
-      var.security_group_name != null
+      var.security_group_ids != null &&
+      var.security_group_names != null
     )
 
-    error_message = "Specify either security_group_id or security_group_name, not both."
+    error_message = "Specify either security_group_ids or security_group_names, not both."
   }
 }
 
