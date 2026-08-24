@@ -232,7 +232,7 @@ variable "boot_from_volume" {
 variable "disk_size" {
   description = "Boot disk size in GB."
   type        = number
-  default     = 100
+  default     = 20
 
   validation {
     condition     = var.disk_size >= 20
