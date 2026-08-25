@@ -165,23 +165,23 @@ module "vm" {
 ## Authentication Rules
 
 - For Linux VMs, you must provide one authentication method:
-  - keypair_id or keypair_name
+  - keypair_name
   - admin_username and admin_password together
 - Do not combine keypair and admin credentials in the same request.
 - For Windows VMs, admin_username/admin_password are not required by this module.
 
 ---
 
-## Name vs ID Inputs
+## Name-Only Inputs
 
-Use one style per pair:
+This module accepts name-based inputs only for VM lookup and resolution:
 
-- flavor or flavor_id
-- image or image_id or snapshot_name
-- vpc_id or vpc_name
-- subnet_id or subnet_name
-- security_group_ids or security_group_names
-- keypair_id or keypair_name
+- flavor
+- image or snapshot_name
+- vpc_name
+- subnet_name
+- security_group_names
+- keypair_name
 
 ---
 
@@ -199,27 +199,20 @@ Use one style per pair:
 |------|-------------|------|---------|
 | vm_name | Virtual machine name | string | n/a |
 | os_type | Operating system type (linux/windows) | string | n/a |
-| flavor | Flavor name | string | null |
-| flavor_id | Flavor ID | string | null |
+| flavor | Flavor name | string | n/a |
 | image | Image name | string | null |
-| image_id | Image ID | string | null |
 | snapshot_name | Snapshot name | string | null |
-| vpc_id | VPC ID | string | null |
-| vpc_name | VPC name | string | null |
-| subnet_id | Subnet ID | string | null |
-| subnet_name | Subnet name | string | null |
+| vpc_name | VPC name | string | n/a |
+| subnet_name | Subnet name | string | n/a |
 | availability_zone | Availability zone | string | null |
 | region | Region (defaults to provider region) | string | null |
 | vm_count | Number of VMs to create (1-10) | number | 1 |
-| security_group_ids | Security group IDs | list(string) | null |
 | security_group_names | Security group names | list(string) | null |
-| keypair_id | Keypair ID | string | null |
 | keypair_name | Keypair name | string | null |
 | admin_username | Linux admin username | string | null |
 | admin_password | Linux admin password | string | null |
 | boot_from_volume | Boot from volume | bool | true |
 | disk_size | Boot disk size in GB | number | 20 |
-| volume_type_id | Volume type ID | string | null |
 | user_data | Cloud-init/bootstrap script | string | null |
 | description | VM description | string | "" |
 | labels | VM labels | list(string) | null |

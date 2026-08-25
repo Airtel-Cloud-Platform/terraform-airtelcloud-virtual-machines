@@ -47,8 +47,6 @@ module "vm" {
 
   disk_size = 150
 
-  volume_type_id = "1"
-
   user_data = <<-EOF
 #!/bin/bash
 hostnamectl set-hostname production-web01

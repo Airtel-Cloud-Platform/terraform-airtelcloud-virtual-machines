@@ -53,23 +53,12 @@ variable "os_type" {
 #########################################
 
 variable "flavor" {
-  description = "Flavor name. Mutually exclusive with flavor_id."
+  description = "Flavor name."
   type        = string
-  default     = null
-}
-
-variable "flavor_id" {
-  description = "Flavor ID. Mutually exclusive with flavor."
-  type        = string
-  default     = null
 
   validation {
-    condition = length(compact([
-      var.flavor,
-      var.flavor_id,
-    ])) == 1
-
-    error_message = "Specify exactly one of flavor or flavor_id."
+    condition     = length(trim(var.flavor, " ")) > 0
+    error_message = "flavor cannot be empty."
   }
 }
 
@@ -78,29 +67,22 @@ variable "flavor_id" {
 #########################################
 
 variable "image" {
-  description = "Image name. Mutually exclusive with image_id and snapshot_name."
+  description = "Image name. Mutually exclusive with snapshot_name."
   type        = string
   default     = null
 
   validation {
     condition = length(compact([
       var.image,
-      var.image_id,
       var.snapshot_name,
     ])) == 1
 
-    error_message = "Specify exactly one of image, image_id, or snapshot_name."
+    error_message = "Specify exactly one of image or snapshot_name."
   }
 }
 
-variable "image_id" {
-  description = "Image ID. Mutually exclusive with image and snapshot_name."
-  type        = string
-  default     = null
-}
-
 variable "snapshot_name" {
-  description = "Snapshot name. Mutually exclusive with image and image_id."
+  description = "Snapshot name. Mutually exclusive with image."
   type        = string
   default     = null
 }
@@ -109,45 +91,23 @@ variable "snapshot_name" {
 # Networking
 #########################################
 
-variable "vpc_id" {
-  description = "VPC ID."
-  type        = string
-  default     = null
-}
-
 variable "vpc_name" {
   description = "VPC Name."
   type        = string
-  default     = null
 
   validation {
-    condition = length(compact([
-      var.vpc_id,
-      var.vpc_name,
-    ])) == 1
-
-    error_message = "Specify exactly one of vpc_id or vpc_name."
+    condition     = length(trim(var.vpc_name, " ")) > 0
+    error_message = "vpc_name cannot be empty."
   }
-}
-
-variable "subnet_id" {
-  description = "Subnet ID."
-  type        = string
-  default     = null
 }
 
 variable "subnet_name" {
   description = "Subnet Name."
   type        = string
-  default     = null
 
   validation {
-    condition = length(compact([
-      var.subnet_id,
-      var.subnet_name,
-    ])) == 1
-
-    error_message = "Specify exactly one of subnet_id or subnet_name."
+    condition     = length(trim(var.subnet_name, " ")) > 0
+    error_message = "subnet_name cannot be empty."
   }
 }
 
@@ -182,34 +142,10 @@ variable "vm_count" {
 # Security Group
 #########################################
 
-variable "security_group_ids" {
-  description = "Security Group IDs."
-  type        = list(string)
-  default     = null
-
-  validation {
-    condition = (
-      var.security_group_ids == null ||
-      alltrue([for sg in var.security_group_ids : length(trim(sg, " ")) > 0])
-    )
-
-    error_message = "security_group_ids must not contain empty values."
-  }
-}
-
 variable "security_group_names" {
   description = "Security Group Names."
   type        = list(string)
   default     = null
-
-  validation {
-    condition = !(
-      var.security_group_ids != null &&
-      var.security_group_names != null
-    )
-
-    error_message = "Specify either security_group_ids or security_group_names, not both."
-  }
 
   validation {
     condition = (
@@ -225,25 +161,10 @@ variable "security_group_names" {
 # Authentication
 #########################################
 
-variable "keypair_id" {
-  description = "Keypair ID."
-  type        = string
-  default     = null
-}
-
 variable "keypair_name" {
   description = "Keypair Name."
   type        = string
   default     = null
-
-  validation {
-    condition = !(
-      var.keypair_id != null &&
-      var.keypair_name != null
-    )
-
-    error_message = "Specify either keypair_id or keypair_name, not both."
-  }
 }
 
 variable "admin_username" {
@@ -279,7 +200,7 @@ variable "admin_password" {
   validation {
     condition = !(
       (var.admin_username != null || var.admin_password != null) &&
-      (var.keypair_id != null || var.keypair_name != null)
+      var.keypair_name != null
     )
 
     error_message = "Use either admin credentials or keypair input, not both."
@@ -288,7 +209,6 @@ variable "admin_password" {
   validation {
     condition = (
       lower(var.os_type) != "linux" ||
-      var.keypair_id != null ||
       var.keypair_name != null ||
       (var.admin_username != null && var.admin_password != null)
     )
@@ -334,12 +254,6 @@ variable "disk_size" {
     condition     = var.disk_size >= 20
     error_message = "disk_size must be greater than or equal to 20 GB."
   }
-}
-
-variable "volume_type_id" {
-  description = "Volume Type ID."
-  type        = string
-  default     = null
 }
 
 variable "user_data" {
