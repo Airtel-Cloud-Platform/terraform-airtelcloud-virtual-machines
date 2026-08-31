@@ -13,16 +13,16 @@ variable "vm_name" {
 }
 
 variable "os_type" {
-  description = "Operating system type. Supported values: linux, windows."
+  description = "Operating system type. Supported values: linux, ubuntu, rhel, suse, centos, windows."
   type        = string
 
   validation {
     condition = contains(
-      ["linux", "windows"],
+      ["linux", "ubuntu", "rhel", "suse", "centos", "windows"],
       lower(var.os_type)
     )
 
-    error_message = "os_type must be either linux or windows."
+    error_message = "os_type must be one of: linux, ubuntu, rhel, suse, centos, windows."
   }
 }
 
@@ -186,21 +186,21 @@ variable "admin_password" {
 
   validation {
     condition = (
-      lower(var.os_type) != "linux" ||
+      lower(var.os_type) == "windows" ||
       var.keypair_name != null ||
       (var.admin_username != null && var.admin_password != null)
     )
 
-    error_message = "For linux os_type, provide either keypair input or admin credentials."
+    error_message = "For non-windows os_type, provide either keypair_name or admin credentials."
   }
 
   validation {
     condition = (
       (var.admin_username == null && var.admin_password == null) ||
-      lower(var.os_type) == "linux"
+      lower(var.os_type) != "windows"
     )
 
-    error_message = "admin_username/admin_password are only supported when os_type is linux."
+    error_message = "admin_username/admin_password are not supported when os_type is windows."
   }
 
   validation {
@@ -287,7 +287,7 @@ variable "enable_backup" {
 }
 
 variable "protection_plan" {
-  description = "Backup protection plan ID/UUID."
+  description = "Backup protection plan UUID or name. The provider accepts either format."
   type        = string
   default     = null
 }
