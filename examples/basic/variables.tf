@@ -2,6 +2,28 @@
 # Basic Configuration
 #########################################
 
+variable "airtel_api_key" {
+  description = "Airtel Cloud API key."
+  type        = string
+  sensitive   = true
+}
+
+variable "airtel_api_secret" {
+  description = "Airtel Cloud API secret."
+  type        = string
+  sensitive   = true
+}
+
+variable "organization" {
+  description = "Airtel Cloud organization."
+  type        = string
+}
+
+variable "project_name" {
+  description = "Airtel Cloud project name."
+  type        = string
+}
+
 variable "vm_name" {
   description = "Virtual machine name."
   type        = string
@@ -31,24 +53,13 @@ variable "os_type" {
 #########################################
 
 variable "flavor" {
-  description = "Flavor name. Mutually exclusive with flavor_id."
+  description = "Flavor name."
   type        = string
-  default     = null
 
   validation {
-    condition = !(
-      var.flavor != null &&
-      var.flavor_id != null
-    )
-
-    error_message = "Specify either flavor or flavor_id, not both."
+    condition     = length(trim(var.flavor, " ")) > 0
+    error_message = "flavor cannot be empty."
   }
-}
-
-variable "flavor_id" {
-  description = "Flavor ID. Mutually exclusive with flavor."
-  type        = string
-  default     = null
 }
 
 #########################################
@@ -56,22 +67,22 @@ variable "flavor_id" {
 #########################################
 
 variable "image" {
-  description = "Image name. Mutually exclusive with image_id."
+  description = "Image name. Mutually exclusive with snapshot_name."
   type        = string
   default     = null
 
   validation {
-    condition = !(
-      var.image != null &&
-      var.image_id != null
-    )
+    condition = length(compact([
+      var.image,
+      var.snapshot_name,
+    ])) == 1
 
-    error_message = "Specify either image or image_id, not both."
+    error_message = "Specify exactly one of image or snapshot_name."
   }
 }
 
-variable "image_id" {
-  description = "Image ID. Mutually exclusive with image."
+variable "snapshot_name" {
+  description = "Snapshot name. Mutually exclusive with image."
   type        = string
   default     = null
 }
@@ -80,45 +91,23 @@ variable "image_id" {
 # Networking
 #########################################
 
-variable "vpc_id" {
-  description = "VPC ID."
-  type        = string
-  default     = null
-}
-
 variable "vpc_name" {
   description = "VPC Name."
   type        = string
-  default     = null
 
   validation {
-    condition = !(
-      var.vpc_id != null &&
-      var.vpc_name != null
-    )
-
-    error_message = "Specify either vpc_id or vpc_name, not both."
+    condition     = length(trim(var.vpc_name, " ")) > 0
+    error_message = "vpc_name cannot be empty."
   }
-}
-
-variable "subnet_id" {
-  description = "Subnet ID."
-  type        = string
-  default     = null
 }
 
 variable "subnet_name" {
   description = "Subnet Name."
   type        = string
-  default     = null
 
   validation {
-    condition = !(
-      var.subnet_id != null &&
-      var.subnet_name != null
-    )
-
-    error_message = "Specify either subnet_id or subnet_name, not both."
+    condition     = length(trim(var.subnet_name, " ")) > 0
+    error_message = "subnet_name cannot be empty."
   }
 }
 
@@ -138,28 +127,33 @@ variable "region" {
   default     = null
 }
 
+variable "vm_count" {
+  description = "Number of VM instances to create."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.vm_count >= 1 && var.vm_count <= 10
+    error_message = "vm_count must be between 1 and 10."
+  }
+}
+
 #########################################
 # Security Group
 #########################################
 
-variable "security_group_id" {
-  description = "Security Group ID."
-  type        = string
-  default     = null
-}
-
-variable "security_group_name" {
-  description = "Security Group Name."
-  type        = string
+variable "security_group_names" {
+  description = "Security Group Names."
+  type        = list(string)
   default     = null
 
   validation {
-    condition = !(
-      var.security_group_id != null &&
-      var.security_group_name != null
+    condition = (
+      var.security_group_names == null ||
+      alltrue([for sg in var.security_group_names : length(trim(sg, " ")) > 0])
     )
 
-    error_message = "Specify either security_group_id or security_group_name, not both."
+    error_message = "security_group_names must not contain empty values."
   }
 }
 
@@ -167,31 +161,25 @@ variable "security_group_name" {
 # Authentication
 #########################################
 
-variable "keypair_id" {
-  description = "Keypair ID."
-  type        = string
-  default     = null
-}
-
 variable "keypair_name" {
   description = "Keypair Name."
   type        = string
   default     = null
-
-  validation {
-    condition = !(
-      var.keypair_id != null &&
-      var.keypair_name != null
-    )
-
-    error_message = "Specify either keypair_id or keypair_name, not both."
-  }
 }
 
 variable "admin_username" {
   description = "Linux administrator username."
   type        = string
   default     = null
+
+  validation {
+    condition = (
+      var.admin_username == null ||
+      length(trim(var.admin_username, " ")) > 0
+    )
+
+    error_message = "admin_username may not be an empty string."
+  }
 }
 
 variable "admin_password" {
@@ -199,6 +187,52 @@ variable "admin_password" {
   type        = string
   default     = null
   sensitive   = true
+
+  validation {
+    condition = (
+      (var.admin_username == null && var.admin_password == null) ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "Specify admin_username and admin_password together."
+  }
+
+  validation {
+    condition = !(
+      (var.admin_username != null || var.admin_password != null) &&
+      var.keypair_name != null
+    )
+
+    error_message = "Use either admin credentials or keypair input, not both."
+  }
+
+  validation {
+    condition = (
+      lower(var.os_type) != "linux" ||
+      var.keypair_name != null ||
+      (var.admin_username != null && var.admin_password != null)
+    )
+
+    error_message = "For linux os_type, provide either keypair input or admin credentials."
+  }
+
+  validation {
+    condition = (
+      (var.admin_username == null && var.admin_password == null) ||
+      lower(var.os_type) == "linux"
+    )
+
+    error_message = "admin_username/admin_password are only supported when os_type is linux."
+  }
+
+  validation {
+    condition = (
+      var.admin_password == null ||
+      length(trim(var.admin_password, " ")) > 0
+    )
+
+    error_message = "admin_password may not be an empty string."
+  }
 }
 
 #########################################
@@ -214,18 +248,12 @@ variable "boot_from_volume" {
 variable "disk_size" {
   description = "Boot disk size in GB."
   type        = number
-  default     = 100
+  default     = 20
 
   validation {
     condition     = var.disk_size >= 20
     error_message = "disk_size must be greater than or equal to 20 GB."
   }
-}
-
-variable "volume_type_id" {
-  description = "Volume Type ID."
-  type        = string
-  default     = null
 }
 
 variable "user_data" {
@@ -244,10 +272,30 @@ variable "description" {
   default     = ""
 }
 
-variable "tags" {
-  description = "Tags to assign to the VM."
-  type        = map(string)
-  default     = {}
+variable "labels" {
+  description = "Labels to assign to the VM."
+  type        = list(string)
+  default     = null
+
+  validation {
+    condition = (
+      var.labels == null ||
+      length(var.labels) <= 5
+    )
+
+    error_message = "labels supports at most 5 labels."
+  }
+
+  validation {
+    condition = (
+      var.labels == null ||
+      alltrue([
+        for label in var.labels : length(trim(label, " ")) >= 3 && length(trim(label, " ")) <= 15
+      ])
+    )
+
+    error_message = "Each label must be between 3 and 15 characters long."
+  }
 }
 
 #########################################
@@ -261,7 +309,7 @@ variable "enable_backup" {
 }
 
 variable "protection_plan" {
-  description = "Backup protection plan."
+  description = "Backup protection plan ID/UUID."
   type        = string
   default     = null
 }
@@ -270,6 +318,21 @@ variable "start_date" {
   description = "Backup start date."
   type        = string
   default     = null
+}
+
+variable "weekday" {
+  description = "Backup weekday. Mutually exclusive with start_date."
+  type        = string
+  default     = null
+
+  validation {
+    condition = !(
+      var.start_date != null &&
+      var.weekday != null
+    )
+
+    error_message = "Specify either start_date or weekday, not both."
+  }
 }
 
 variable "start_time" {

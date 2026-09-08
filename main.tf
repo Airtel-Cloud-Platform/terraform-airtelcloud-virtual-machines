@@ -1,89 +1,171 @@
-resource "airtelcloud_vm" "this" {
+locals {
+  use_snapshot          = var.snapshot_name != null
+  use_admin_credentials = var.admin_username != null || var.admin_password != null
+}
 
-  #####################################
-  # Basic Configuration
-  #####################################
+resource "airtelcloud_vm" "keypair_image" {
+  count = !local.use_snapshot && !local.use_admin_credentials ? 1 : 0
 
   instance_name = var.vm_name
+  os_type       = var.os_type
 
-  os_type = var.os_type
+  flavor_name = var.flavor
+  image_name  = var.image
 
-  flavor_id   = var.flavor_id
-  flavor_name = var.flavor_id == null ? var.flavor : null
+  vpc_name    = var.vpc_name
+  subnet_name = var.subnet_name
 
-  image_id   = var.image_id
-  image_name = var.image_id == null ? var.image : null
+  security_group_names = var.security_group_names
 
-  #####################################
-  # Networking
-  #####################################
+  keypair_name = var.keypair_name
 
-  vpc_id   = var.vpc_id
-  vpc_name = var.vpc_id == null ? var.vpc_name : null
+  user_data        = var.user_data
+  boot_from_volume = var.boot_from_volume
+  disk_size        = var.disk_size
 
-  subnet_id   = var.subnet_id
-  subnet_name = var.subnet_id == null ? var.subnet_name : null
+  availability_zone = var.availability_zone
+  region            = var.region
+  vm_count          = var.vm_count
 
-  #####################################
-  # Security
-  #####################################
+  description = var.description
+  labels      = var.labels
 
-  security_group_id   = var.security_group_id
-  security_group_name = var.security_group_id == null ? var.security_group_name : null
+  enable_backup   = var.enable_backup
+  protection_plan = var.protection_plan
+  start_date      = var.start_date
+  weekday         = var.weekday
+  start_time      = var.start_time
 
-  #####################################
-  # Authentication
-  #####################################
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
 
-  keypair_id   = var.keypair_id
-  keypair_name = var.keypair_id == null ? var.keypair_name : null
+    content {
+      create = try(timeouts.value.create, null)
+      delete = try(timeouts.value.delete, null)
+    }
+  }
+}
+
+resource "airtelcloud_vm" "keypair_snapshot" {
+  count = local.use_snapshot && !local.use_admin_credentials ? 1 : 0
+
+  instance_name = var.vm_name
+  os_type       = var.os_type
+
+  flavor_name   = var.flavor
+  snapshot_name = var.snapshot_name
+
+  vpc_name    = var.vpc_name
+  subnet_name = var.subnet_name
+
+  security_group_names = var.security_group_names
+
+  keypair_name = var.keypair_name
+
+  user_data        = var.user_data
+  boot_from_volume = var.boot_from_volume
+  disk_size        = var.disk_size
+
+  availability_zone = var.availability_zone
+  region            = var.region
+  vm_count          = var.vm_count
+
+  description = var.description
+  labels      = var.labels
+
+  enable_backup   = var.enable_backup
+  protection_plan = var.protection_plan
+  start_date      = var.start_date
+  weekday         = var.weekday
+  start_time      = var.start_time
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = try(timeouts.value.create, null)
+      delete = try(timeouts.value.delete, null)
+    }
+  }
+}
+
+resource "airtelcloud_vm" "admin_image" {
+  count = !local.use_snapshot && local.use_admin_credentials ? 1 : 0
+
+  instance_name = var.vm_name
+  os_type       = var.os_type
+
+  flavor_name = var.flavor
+  image_name  = var.image
+
+  vpc_name    = var.vpc_name
+  subnet_name = var.subnet_name
+
+  security_group_names = var.security_group_names
 
   admin_username = var.admin_username
   admin_password = var.admin_password
 
-  #####################################
-  # Boot Configuration
-  #####################################
-
-  user_data = var.user_data
-
+  user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
-
-  disk_size = var.disk_size
-
-  volume_type_id = var.volume_type_id
-
-  #####################################
-  # Placement
-  #####################################
+  disk_size        = var.disk_size
 
   availability_zone = var.availability_zone
-
-  region = var.region
-
-  #####################################
-  # Metadata
-  #####################################
+  region            = var.region
+  vm_count          = var.vm_count
 
   description = var.description
+  labels      = var.labels
 
-  tags = var.tags
-
-  #####################################
-  # Backup
-  #####################################
-
-  enable_backup = var.enable_backup
-
+  enable_backup   = var.enable_backup
   protection_plan = var.protection_plan
+  start_date      = var.start_date
+  weekday         = var.weekday
+  start_time      = var.start_time
 
-  start_date = var.start_date
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
 
-  start_time = var.start_time
+    content {
+      create = try(timeouts.value.create, null)
+      delete = try(timeouts.value.delete, null)
+    }
+  }
+}
 
-  #####################################
-  # Timeouts
-  #####################################
+resource "airtelcloud_vm" "admin_snapshot" {
+  count = local.use_snapshot && local.use_admin_credentials ? 1 : 0
+
+  instance_name = var.vm_name
+  os_type       = var.os_type
+
+  flavor_name   = var.flavor
+  snapshot_name = var.snapshot_name
+
+  vpc_name    = var.vpc_name
+  subnet_name = var.subnet_name
+
+  security_group_names = var.security_group_names
+
+  admin_username = var.admin_username
+  admin_password = var.admin_password
+
+  user_data        = var.user_data
+  boot_from_volume = var.boot_from_volume
+  disk_size        = var.disk_size
+
+  availability_zone = var.availability_zone
+  region            = var.region
+  vm_count          = var.vm_count
+
+  description = var.description
+  labels      = var.labels
+
+  enable_backup   = var.enable_backup
+  protection_plan = var.protection_plan
+  start_date      = var.start_date
+  weekday         = var.weekday
+  start_time      = var.start_time
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]

@@ -2,21 +2,20 @@
 
 This Terraform module provisions Virtual Machines (VMs) on Airtel Cloud using the `airtelcloud_vm` resource.
 
-The module supports all capabilities currently available in the Airtel Cloud Terraform Provider, including:
+## Capabilities
 
 - VM creation
 - Boot from volume
-- Image by ID or Name
-- Flavor by ID or Name
-- VPC by ID or Name
-- Subnet by ID or Name
-- Security Group by ID or Name
-- Keypair by ID or Name
-- Username/Password authentication
-- Backup configuration
-- Cloud-init (User Data)
-- Tags
-- Timeouts
+- Flavor by ID or name
+- Image by ID, name, or snapshot name
+- VPC by ID or name
+- Subnet by ID or name
+- Security groups by ID list or name list
+- SSH keypair authentication
+- Linux admin username/password authentication
+- Backup scheduling by date or weekday
+- Labels
+- Resource timeouts
 
 ---
 
@@ -37,95 +36,72 @@ The module supports all capabilities currently available in the Airtel Cloud Ter
 
 ---
 
-# Usage
+## Usage
 
-## Basic Example
+### Basic Example
 
 ```hcl
 module "vm" {
-
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "web01"
-
   os_type = "linux"
 
   flavor = "ccd.Large"
+  image  = "CentOS_Stream9_May2026"
 
-  image = "CentOS_Stream9_May2026"
-
-  vpc_name = "production"
-
+  vpc_name    = "production"
   subnet_name = "private"
 
   availability_zone = "S1"
-
-  keypair_name = "platform-key"
-
+  keypair_name      = "platform-key"
 }
 ```
 
----
-
-## Linux VM with Username and Password
+### Linux VM with Admin Credentials
 
 ```hcl
 module "vm" {
-
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "linux-app01"
-
   os_type = "linux"
 
   flavor = "ccd.Large"
+  image  = "CentOS_Stream9_May2026"
 
-  image = "CentOS_Stream9_May2026"
-
-  vpc_name = "production"
-
+  vpc_name    = "production"
   subnet_name = "private"
 
   availability_zone = "S1"
 
   admin_username = "terraform"
-
   admin_password = "StrongPassword@123"
-
 }
 ```
 
----
-
-## Linux VM Complete Example with Username and Password
+### Linux VM Complete Example
 
 ```hcl
 module "linux_vm_complete" {
-
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "linux-prod-app01"
-
   os_type = "linux"
 
   flavor = "ccd.XLarge"
+  image  = "CentOS_Stream9_May2026"
 
-  image = "CentOS_Stream9_May2026"
-
-  vpc_name = "production"
-
+  vpc_name    = "production"
   subnet_name = "private"
 
-  security_group_name = "default"
-
-  availability_zone = "S1"
+  security_group_names = ["default"]
+  availability_zone    = "S1"
 
   admin_username = "terraform"
-
   admin_password = "StrongPassword@123"
 
-  disk_size = 100
-
+  disk_size        = 20
   boot_from_volume = true
 
   user_data = <<-EOT
@@ -135,257 +111,136 @@ module "linux_vm_complete" {
     systemctl start nginx
   EOT
 
-  enable_backup = true
-
-  protection_plan = "daily"
-
-  start_date = "2026-06-01"
-
-  start_time = "02:00"
+  enable_backup   = true
+  protection_plan = "plan-id-or-uuid"
+  weekday         = "monday"
+  start_time      = "02:00"
 
   description = "Linux production VM using username/password authentication"
-
-  tags = {
-    Environment = "Production"
-    Application = "Web"
-    Team        = "Platform"
-  }
-
+  labels      = ["prod", "web", "platform"]
 }
 ```
 
----
-
-## Windows VM with Username and Password
+### Windows VM Basic Example
 
 ```hcl
 module "vm" {
-
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
   vm_name = "windows-app01"
-
   os_type = "windows"
 
   flavor = "ccd.Large"
+  image  = "WIN2K19_PREACT_Jul2026"
 
-  image = "WIN2K19_PREACT_Jul2026"
-
-  vpc_name = "production"
-
+  vpc_name    = "production"
   subnet_name = "private"
 
   availability_zone = "S1"
-
-
 }
 ```
 
----
-
-## Windows VM Complete Example with Username and Password
-
-```hcl
-module "windows_vm_complete" {
-
-  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
-
-  vm_name = "windows-prod-app01"
-
-  os_type = "windows"
-
-  flavor = "ccd.XLarge"
-
-  image = "WIN2K19_PREACT_Jul2026"
-
-  vpc_name = "production"
-
-  subnet_name = "private"
-
-  security_group_name = "default"
-
-  availability_zone = "S1"
-
-  disk_size = 200
-
-  boot_from_volume = true
-
-  enable_backup = true
-
-  protection_plan = "daily"
-
-  start_date = "2026-06-01"
-
-  start_time = "02:00"
-
-  description = "Windows production VM using username/password authentication"
-
-  tags = {
-    Environment = "Production"
-    Application = "App"
-    Team        = "Platform"
-  }
-
-}
-```
-
----
-
-## Complete Example
+### Snapshot-Based Image Example
 
 ```hcl
 module "vm" {
-
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
-  vm_name = "production-web"
-
+  vm_name = "snapshot-vm"
   os_type = "linux"
 
-  flavor = "ccd.XLarge"
+  flavor        = "ccd.Large"
+  snapshot_name = "golden-linux-snapshot"
 
-  image = "CentOS_Stream9_May2026"
-
-  vpc_name = "production"
-
+  vpc_name    = "production"
   subnet_name = "private"
 
-  security_group_name = "default"
-
-  keypair_name = "platform-key"
-
   availability_zone = "S1"
-
-  disk_size = 100
-
-  boot_from_volume = true
-
-  enable_backup = true
-
-  protection_plan = "daily"
-
-  start_date = "2026-06-01"
-
-  start_time = "02:00"
-
-  tags = {
-    Environment = "Production"
-    Team        = "Platform"
-  }
-
+  keypair_name      = "platform-key"
 }
 ```
 
 ---
 
-# Authentication Options
+## Authentication Rules
 
-The module supports both authentication methods supported by the provider.
-
-## SSH Keypair
-
-```hcl
-keypair_id = "xxxxx"
-```
-
-or
-
-```hcl
-keypair_name = "platform-key"
-```
+- For Linux VMs, you must provide one authentication method:
+  - keypair_name
+  - admin_username and admin_password together
+- Do not combine keypair and admin credentials in the same request.
+- For Windows VMs, admin_username/admin_password are not required by this module.
 
 ---
 
-## Username / Password
+## Name-Only Inputs
 
-```hcl
-admin_username = "terraform"
+This module accepts name-based inputs only for VM lookup and resolution:
 
-admin_password = "Password@123"
-```
-
----
-
-# Network Selection
-
-Resources can be referenced either by **ID** or by **Name**.
-
-Example:
-
-```hcl
-vpc_id = "123"
-```
-
-or
-
-```hcl
-vpc_name = "production"
-```
-
-The same applies to:
-
-- Flavor
-- Image
-- VPC
-- Subnet
-- Security Group
-- Keypair
+- flavor
+- image or snapshot_name
+- vpc_name
+- subnet_name
+- security_group_names
+- keypair_name
 
 ---
 
-# Inputs
+## Backup Inputs
+
+- protection_plan expects the plan ID/UUID.
+- Use either start_date or weekday (not both).
+- start_time accepts HH:MM (24-hour format).
+
+---
+
+## Inputs
 
 | Name | Description | Type | Default |
 |------|-------------|------|---------|
-| vm_name | VM Name | string | n/a |
-| os_type | linux/windows | string | n/a |
-| flavor | Flavor Name | string | null |
-| flavor_id | Flavor ID | string | null |
-| image | Image Name | string | null |
-| image_id | Image ID | string | null |
-| vpc_id | VPC ID | string | null |
-| vpc_name | VPC Name | string | null |
-| subnet_id | Subnet ID | string | null |
-| subnet_name | Subnet Name | string | null |
-| security_group_id | Security Group ID | string | null |
-| security_group_name | Security Group Name | string | null |
-| keypair_id | Keypair ID | string | null |
-| keypair_name | Keypair Name | string | null |
-| admin_username | Admin Username | string | null |
-| admin_password | Admin Password | string | null |
-| availability_zone | Availability Zone | string | null |
-| region | Region | string | null |
-| disk_size | Disk Size (GB) | number | 100 |
-| boot_from_volume | Boot From Volume | bool | true |
-| volume_type_id | Volume Type ID | string | null |
-| user_data | Cloud Init | string | null |
-| description | VM Description | string | "" |
-| enable_backup | Enable Backup | bool | false |
-| protection_plan | Backup Policy | string | null |
-| start_date | Backup Date | string | null |
-| start_time | Backup Time | string | null |
-| tags | Tags | map(string) | {} |
+| vm_name | Virtual machine name | string | n/a |
+| os_type | Operating system type (linux/windows) | string | n/a |
+| flavor | Flavor name | string | n/a |
+| image | Image name | string | null |
+| snapshot_name | Snapshot name | string | null |
+| vpc_name | VPC name | string | n/a |
+| subnet_name | Subnet name | string | n/a |
+| availability_zone | Availability zone | string | null |
+| region | Region (defaults to provider region) | string | null |
+| vm_count | Number of VMs to create (1-10) | number | 1 |
+| security_group_names | Security group names | list(string) | null |
+| keypair_name | Keypair name | string | null |
+| admin_username | Linux admin username | string | null |
+| admin_password | Linux admin password | string | null |
+| boot_from_volume | Boot from volume | bool | true |
+| disk_size | Boot disk size in GB | number | 20 |
+| user_data | Cloud-init/bootstrap script | string | null |
+| description | VM description | string | "" |
+| labels | VM labels | list(string) | null |
+| enable_backup | Enable VM backup | bool | false |
+| protection_plan | Backup protection plan ID/UUID | string | null |
+| start_date | Backup start date | string | null |
+| weekday | Backup weekday | string | null |
+| start_time | Backup start time | string | null |
+| timeouts | Terraform resource timeouts | object({ create = optional(string), delete = optional(string) }) | null |
 
 ---
 
-# Outputs
+## Outputs
 
 | Name | Description |
 |------|-------------|
 | id | VM ID |
-| provider_instance_id | Provider Instance ID |
-| instance_name | VM Name |
-| status | Current VM Status |
-| public_ip | Public IP |
-| private_ip | Private IP |
-| availability_zone | Availability Zone |
+| provider_instance_id | Provider instance ID |
+| instance_name | VM name |
+| status | VM status |
+| public_ip | Public IP address |
+| private_ip | Private IP address |
+| availability_zone | Availability zone |
 | region | Region |
 
 ---
 
-# Notes
+## Notes
 
-- Either ID or Name can be used for supported resources.
-- Existing users can continue using `flavor` and `image`; these map internally to the provider's `flavor_name` and `image_name`.
-- Username/password authentication is supported only for Linux VMs, as enforced by the provider.
-- The module intentionally does not expose `vm_count` because of the provider behavior you previously observed with resource destruction.
+- Validate inputs with `terraform validate` before apply.
+- Keep secrets like admin_password in secure variable handling (for example, environment variables or secret managers).

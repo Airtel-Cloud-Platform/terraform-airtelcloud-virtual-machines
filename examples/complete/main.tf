@@ -35,7 +35,7 @@ module "vm" {
 
   subnet_name = "private"
 
-  security_group_name = "default"
+  security_group_names = ["default"]
 
   keypair_name = "platform-key"
 
@@ -47,8 +47,6 @@ module "vm" {
 
   disk_size = 150
 
-  volume_type_id = "1"
-
   user_data = <<-EOF
 #!/bin/bash
 hostnamectl set-hostname production-web01
@@ -57,18 +55,13 @@ EOF
 
   enable_backup = true
 
-  protection_plan = "daily"
+  protection_plan = "REPLACE_WITH_PLAN_ID"
 
   start_date = "2026-06-01"
 
   start_time = "02:00"
 
-  tags = {
-    Environment = "Production"
-    Application = "Web"
-    Team        = "Platform"
-    ManagedBy   = "Terraform"
-  }
+  labels = ["production", "web", "platform", "terraform"]
 
   timeouts = {
     create = "30m"
