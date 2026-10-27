@@ -1,23 +1,23 @@
 locals {
   use_snapshot          = var.snapshot_name != null
   use_admin_credentials = var.admin_username != null || var.admin_password != null
+  instance_name         = coalesce(var.instance_name, var.vm_name)
 }
 
 resource "airtelcloud_vm" "keypair_image" {
   count = !local.use_snapshot && !local.use_admin_credentials ? 1 : 0
 
-  instance_name = var.vm_name
+  instance_name = local.instance_name
   os_type       = var.os_type
 
-  flavor_name = var.flavor
-  image_name  = var.image
+  flavor_name = var.flavor_name
+  image_name  = var.image_name
 
   vpc_name    = var.vpc_name
   subnet_name = var.subnet_name
 
   security_group_names = var.security_group_names
-
-  keypair_name = var.keypair_name
+  keypair_name         = var.keypair_name
 
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
@@ -49,18 +49,17 @@ resource "airtelcloud_vm" "keypair_image" {
 resource "airtelcloud_vm" "keypair_snapshot" {
   count = local.use_snapshot && !local.use_admin_credentials ? 1 : 0
 
-  instance_name = var.vm_name
+  instance_name = local.instance_name
   os_type       = var.os_type
 
-  flavor_name   = var.flavor
+  flavor_name   = var.flavor_name
   snapshot_name = var.snapshot_name
 
   vpc_name    = var.vpc_name
   subnet_name = var.subnet_name
 
   security_group_names = var.security_group_names
-
-  keypair_name = var.keypair_name
+  keypair_name         = var.keypair_name
 
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
@@ -92,11 +91,11 @@ resource "airtelcloud_vm" "keypair_snapshot" {
 resource "airtelcloud_vm" "admin_image" {
   count = !local.use_snapshot && local.use_admin_credentials ? 1 : 0
 
-  instance_name = var.vm_name
+  instance_name = local.instance_name
   os_type       = var.os_type
 
-  flavor_name = var.flavor
-  image_name  = var.image
+  flavor_name = var.flavor_name
+  image_name  = var.image_name
 
   vpc_name    = var.vpc_name
   subnet_name = var.subnet_name
@@ -136,10 +135,10 @@ resource "airtelcloud_vm" "admin_image" {
 resource "airtelcloud_vm" "admin_snapshot" {
   count = local.use_snapshot && local.use_admin_credentials ? 1 : 0
 
-  instance_name = var.vm_name
+  instance_name = local.instance_name
   os_type       = var.os_type
 
-  flavor_name   = var.flavor
+  flavor_name   = var.flavor_name
   snapshot_name = var.snapshot_name
 
   vpc_name    = var.vpc_name
