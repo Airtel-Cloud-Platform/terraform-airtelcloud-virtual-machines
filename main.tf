@@ -22,6 +22,7 @@ resource "airtelcloud_vm" "keypair_image" {
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
   disk_size        = var.disk_size
+  volume_type_id   = var.volume_type_id
 
   availability_zone = var.availability_zone
   region            = var.region
@@ -64,6 +65,7 @@ resource "airtelcloud_vm" "keypair_snapshot" {
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
   disk_size        = var.disk_size
+  volume_type_id   = var.volume_type_id
 
   availability_zone = var.availability_zone
   region            = var.region
@@ -108,6 +110,7 @@ resource "airtelcloud_vm" "admin_image" {
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
   disk_size        = var.disk_size
+  volume_type_id   = var.volume_type_id
 
   availability_zone = var.availability_zone
   region            = var.region
@@ -152,6 +155,7 @@ resource "airtelcloud_vm" "admin_snapshot" {
   user_data        = var.user_data
   boot_from_volume = var.boot_from_volume
   disk_size        = var.disk_size
+  volume_type_id   = var.volume_type_id
 
   availability_zone = var.availability_zone
   region            = var.region

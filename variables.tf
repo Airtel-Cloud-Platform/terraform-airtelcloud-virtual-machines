@@ -167,6 +167,12 @@ variable "boot_from_volume" {
   default     = true
 }
 
+variable "volume_type_id" {
+  description = "Boot volume type ID. Optional."
+  type        = string
+  default     = null
+}
+
 variable "disk_size" {
   description = "Boot disk size in GB."
   type        = number

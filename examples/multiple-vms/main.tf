@@ -21,7 +21,7 @@ module "vm" {
   os_type       = "linux"
 
   flavor_name = each.value.flavor
-  image_name  = "CentOS_Stream9_May2026"
+  image_name  = "Ubuntu22_04_Jul2026"
 
   vpc_name    = "production"
   subnet_name = "private"
