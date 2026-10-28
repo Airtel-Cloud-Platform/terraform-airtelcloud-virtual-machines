@@ -1,54 +1,35 @@
 # Airtel Cloud Virtual Machine Terraform Module
 
-This Terraform module provisions Virtual Machines (VMs) on Airtel Cloud using the `airtelcloud_vm` resource.
+This Terraform module provisions Airtel Cloud VMs using the `airtelcloud_vm` resource in the provider.
 
-## Capabilities
+## Supported behavior
 
-- VM creation
-- Boot from volume
-- Flavor by ID or name
-- Image by ID, name, or snapshot name
-- VPC by ID or name
-- Subnet by ID or name
-- Security groups by ID list or name list
-- SSH keypair authentication
-- Linux admin username/password authentication
-- Backup scheduling by date or weekday
-- Labels
-- Resource timeouts
-
----
+- Create a VM from an image or snapshot
+- Use Linux keypair authentication or Linux admin credentials
+- Attach security groups by name
+- Optionally enable backup settings and labels
+- Keep the module input surface clean and provider-friendly
 
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| Terraform | >= 1.3 |
-| airtelcloud | >= 1.1.4 |
-
----
-
-## Providers
-
-| Name | Version |
-|------|---------|
-| airtelcloud | >= 1.1.4 |
-
----
+| Terraform | >= 1.5 |
+| airtelcloud provider | >= 1.1.3 |
 
 ## Usage
 
-### Basic Example
+### Basic example
 
 ```hcl
 module "vm" {
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
-  vm_name = "web01"
-  os_type = "linux"
+  instance_name = "web01"
+  os_type       = "linux"
 
-  flavor = "ccd.Large"
-  image  = "CentOS_Stream9_May2026"
+  flavor_name = "ccd.Large"
+  image_name  = "Ubuntu22_04_Jul2026"
 
   vpc_name    = "production"
   subnet_name = "private"
@@ -58,98 +39,39 @@ module "vm" {
 }
 ```
 
-### Linux VM with Admin Credentials
+### Linux VM with admin credentials
 
 ```hcl
-module "vm" {
+module "linux_vm" {
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
-  vm_name = "linux-app01"
-  os_type = "linux"
+  instance_name = "linux-app01"
+  os_type       = "linux"
 
-  flavor = "ccd.Large"
-  image  = "CentOS_Stream9_May2026"
+  flavor_name = "ccd.Large"
+  image_name  = "Ubuntu22_04_Jul2026"
 
   vpc_name    = "production"
   subnet_name = "private"
-
-  availability_zone = "S1"
-
-  admin_username = "terraform"
-  admin_password = "StrongPassword@123"
-}
-```
-
-### Linux VM Complete Example
-
-```hcl
-module "linux_vm_complete" {
-  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
-
-  vm_name = "linux-prod-app01"
-  os_type = "linux"
-
-  flavor = "ccd.XLarge"
-  image  = "CentOS_Stream9_May2026"
-
-  vpc_name    = "production"
-  subnet_name = "private"
-
-  security_group_names = ["default"]
-  availability_zone    = "S1"
 
   admin_username = "terraform"
   admin_password = "StrongPassword@123"
 
-  disk_size        = 20
-  boot_from_volume = true
-
-  user_data = <<-EOT
-    #!/bin/bash
-    yum install -y nginx
-    systemctl enable nginx
-    systemctl start nginx
-  EOT
-
-  enable_backup   = true
-  protection_plan = "plan-id-or-uuid"
-  weekday         = "monday"
-  start_time      = "02:00"
-
-  description = "Linux production VM using username/password authentication"
-  labels      = ["prod", "web", "platform"]
-}
-```
-
-### Windows VM Basic Example
-
-```hcl
-module "vm" {
-  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
-
-  vm_name = "windows-app01"
-  os_type = "windows"
-
-  flavor = "ccd.Large"
-  image  = "WIN2K19_PREACT_Jul2026"
-
-  vpc_name    = "production"
-  subnet_name = "private"
-
   availability_zone = "S1"
+  disk_size         = 100
 }
 ```
 
-### Snapshot-Based Image Example
+### Snapshot-based VM
 
 ```hcl
-module "vm" {
+module "snapshot_vm" {
   source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
 
-  vm_name = "snapshot-vm"
-  os_type = "linux"
+  instance_name = "snapshot-vm"
+  os_type       = "linux"
 
-  flavor        = "ccd.Large"
+  flavor_name   = "ccd.Large"
   snapshot_name = "golden-linux-snapshot"
 
   vpc_name    = "production"
@@ -160,87 +82,61 @@ module "vm" {
 }
 ```
 
----
+## Authentication rules
 
-## Authentication Rules
-
-- For Linux VMs, you must provide one authentication method:
-  - keypair_name
-  - admin_username and admin_password together
-- Do not combine keypair and admin credentials in the same request.
-- For Windows VMs, admin_username/admin_password are not required by this module.
-
----
-
-## Name-Only Inputs
-
-This module accepts name-based inputs only for VM lookup and resolution:
-
-- flavor
-- image or snapshot_name
-- vpc_name
-- subnet_name
-- security_group_names
-- keypair_name
-
----
-
-## Backup Inputs
-
-- protection_plan expects the plan ID/UUID.
-- Use either start_date or weekday (not both).
-- start_time accepts HH:MM (24-hour format).
-
----
+- For Linux VMs, use one path only:
+  - `keypair_name`
+  - or `admin_username` + `admin_password`
+- Do not combine keypair auth and admin credentials in the same VM.
+- Windows examples normally use the platform default path without admin credential injection.
 
 ## Inputs
 
 | Name | Description | Type | Default |
 |------|-------------|------|---------|
-| vm_name | Virtual machine name | string | n/a |
-| os_type | Operating system type (linux/windows) | string | n/a |
-| flavor | Flavor name | string | n/a |
-| image | Image name | string | null |
+| instance_name | VM instance name | string | null |
+| vm_name | Deprecated alias for instance_name | string | null |
+| os_type | VM OS type | string | required |
+| flavor_name | Flavor name | string | null |
+| image_name | Image name | string | null |
 | snapshot_name | Snapshot name | string | null |
-| vpc_name | VPC name | string | n/a |
-| subnet_name | Subnet name | string | n/a |
-| availability_zone | Availability zone | string | null |
-| region | Region (defaults to provider region) | string | null |
-| vm_count | Number of VMs to create (1-10) | number | 1 |
+| vpc_name | VPC name | string | null |
+| subnet_name | Subnet name | string | null |
 | security_group_names | Security group names | list(string) | null |
 | keypair_name | Keypair name | string | null |
 | admin_username | Linux admin username | string | null |
 | admin_password | Linux admin password | string | null |
-| boot_from_volume | Boot from volume | bool | true |
+| availability_zone | Availability zone | string | null |
+| region | Region override | string | null |
+| vm_count | Number of VMs to create | number | 1 |
+| boot_from_volume | Boot the VM from a volume | bool | true |
 | disk_size | Boot disk size in GB | number | 20 |
-| user_data | Cloud-init/bootstrap script | string | null |
+| user_data | Cloud-init or bootstrap script | string | null |
 | description | VM description | string | "" |
-| labels | VM labels | list(string) | null |
-| enable_backup | Enable VM backup | bool | false |
-| protection_plan | Backup protection plan ID/UUID | string | null |
+| labels | Labels to assign | list(string) | null |
+| enable_backup | Enable backup | bool | false |
+| protection_plan | Backup plan UUID or name | string | null |
 | start_date | Backup start date | string | null |
 | weekday | Backup weekday | string | null |
 | start_time | Backup start time | string | null |
-| timeouts | Terraform resource timeouts | object({ create = optional(string), delete = optional(string) }) | null |
-
----
+| timeouts | Terraform create/delete timeouts | object | null |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
 | id | VM ID |
-| provider_instance_id | Provider instance ID |
+| provider_instance_id | Provider-specific instance ID |
 | instance_name | VM name |
 | status | VM status |
-| public_ip | Public IP address |
-| private_ip | Private IP address |
+| public_ip | Public IP |
+| private_ip | Private IP |
 | availability_zone | Availability zone |
 | region | Region |
 
----
-
 ## Notes
 
+- This module intentionally keeps the interface simple and follows the provider’s supported VM patterns instead of exposing every low-level provider detail.
+- Prefer `instance_name` for new configurations; the legacy `vm_name` alias is kept only for compatibility.
 - Validate inputs with `terraform validate` before apply.
 - Keep secrets like admin_password in secure variable handling (for example, environment variables or secret managers).
