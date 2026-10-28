@@ -82,6 +82,90 @@ module "snapshot_vm" {
 }
 ```
 
+### Linux VM with SSH keypair
+
+```hcl
+module "vm" {
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  instance_name = "web-server-keypair"
+  os_type       = "linux"
+
+  flavor_name = "ccd.Large"
+  image_name  = "Ubuntu22_04_Jul2026"
+
+  vpc_name    = "vpc01"
+  subnet_name = "sub1"
+
+  security_group_names = ["all-open-az1"]
+  availability_zone    = "S1"
+  boot_from_volume     = true
+  disk_size            = 120
+  volume_type_id       = "31"
+  keypair_name         = "my-linux-keypair"
+
+  labels = ["production", "keypair-auth", "api"]
+}
+```
+
+### Linux VM using image_name with multiple security groups
+
+```hcl
+variable "vm_admin_password" {
+  type      = string
+  sensitive = true
+}
+
+module "vm" {
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  instance_name = "web-server-multi-sg"
+  os_type       = "linux"
+
+  flavor_name = "ccd.Large"
+  image_name  = "Ubuntu22_04_Jul2026"
+
+  vpc_name    = "vpc01"
+  subnet_name = "sub1"
+
+  security_group_names = ["all-open-az1", "ssh-open", "app-allow", "db-allow"]
+  availability_zone    = "S1"
+  boot_from_volume     = true
+  disk_size            = 100
+  volume_type_id       = "31"
+  admin_username       = "clouduser"
+  admin_password       = var.vm_admin_password
+}
+```
+
+### Windows VM with backup
+
+```hcl
+module "vm" {
+  source = "Airtel-Cloud-Platform/virtual-machines/airtelcloud"
+
+  instance_name = "win-server"
+  os_type       = "windows"
+
+  flavor_name = "ccd.Large"
+  image_name  = "WIN2K19_PREACT_Jul2026"
+
+  vpc_name    = "vpc01"
+  subnet_name = "sub1"
+
+  security_group_names = ["all-open-az1"]
+  availability_zone    = "N1"
+  disk_size            = 100
+  boot_from_volume     = true
+  enable_backup        = true
+  protection_plan      = "S2-ELEMENTS-COPPER-TFT-DAILY-BACKUP-BKP-PP"
+  weekday              = "monday"
+  start_time           = "02:00"
+
+  labels = ["production", "windows", "backup"]
+}
+```
+
 ## Authentication rules
 
 - For Linux VMs, use one path only:
@@ -111,6 +195,7 @@ module "snapshot_vm" {
 | vm_count | Number of VMs to create | number | 1 |
 | boot_from_volume | Boot the VM from a volume | bool | true |
 | disk_size | Boot disk size in GB | number | 20 |
+| volume_type_id | Boot volume type ID | string | null |
 | user_data | Cloud-init or bootstrap script | string | null |
 | description | VM description | string | "" |
 | labels | Labels to assign | list(string) | null |
